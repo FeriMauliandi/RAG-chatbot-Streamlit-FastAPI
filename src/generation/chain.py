@@ -18,7 +18,7 @@ def create_rag_chain():
     
     prompt = get_rag_prompt()
     
-    llm = ChatOllama(model="deepseek-v3.1:671b-cloud", temperature=0.4) 
+    llm = ChatOllama(model="qwen3.5:cloud", temperature=0.4) 
     
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
