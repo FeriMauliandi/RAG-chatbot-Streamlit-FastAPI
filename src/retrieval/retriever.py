@@ -29,19 +29,14 @@ if __name__ == "__main__":
     from src.ingestion.embedder import get_embedding_model
     from src.retrieval.vector_store import get_vector_store
     
-    # 1. Muat embedder dan vector store (tanpa chunks baru, karena sudah ada dari testing sebelumnya)
     embedder = get_embedding_model()
     vs = get_vector_store(embedding_model=embedder)
     
-    # 2. Buat retriever (ambil 1 hasil paling relevan saja)
     retriever = get_retriever(vs, k=1)
     
-    # 3. Lakukan simulasi pencarian
-    pertanyaan = "Apa itu LangChain?"
+    pertanyaan = "Apa itu ChromaDB?"
     print(f"\nPertanyaan: '{pertanyaan}'")
     
-    # Menggunakan similarity_search_with_score langsung dari Vector Store
-    # untuk melihat angka di balik layar
     hasil_dengan_skor = vs.similarity_search_with_score(pertanyaan, k=3)
     
     print("\nHasil Pencarian dan Skor Jarak (Makin kecil angkanya, makin relevan):")
