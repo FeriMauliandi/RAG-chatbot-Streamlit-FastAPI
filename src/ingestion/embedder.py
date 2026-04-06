@@ -1,7 +1,9 @@
 from langchain_huggingface import HuggingFaceEmbeddings
 import torch
 
-def get_embedding_model(model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
+model_name = "Qwen/Qwen3-Embedding-0.6B"
+
+def get_embedding_model(model_name: str = model_name):
     """
     Menginisialisasi model Sentence Transformer dari HuggingFace.
     Mengembalikan objek HuggingFaceEmbeddings yang siap digunakan.
@@ -26,7 +28,7 @@ def get_embedding_model(model_name: str = "sentence-transformers/all-MiniLM-L6-v
 # ==========================================
 if __name__ == "__main__":
     # Inisialisasi model
-    embedder = get_embedding_model()
+    embedder = get_embedding_model(model_name)
     
     # Mencoba mengubah teks menjadi vektor
     teks_uji = "Mengubah teks menjadi angka agar dipahami oleh mesin."
