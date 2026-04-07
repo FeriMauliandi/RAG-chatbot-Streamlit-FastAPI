@@ -2,7 +2,6 @@ import os
 from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader, TextLoader, CSVLoader
 
 def load_data(source: str):
-    """Fungsi untuk memuat data dari PDF, Web URL, Markdown (.md), atau CSV."""
     print(f"Mencoba memuat data dari: {source}")
     
     if source.startswith("http://") or source.startswith("https://"):
@@ -22,7 +21,6 @@ def load_data(source: str):
     # TAMBAHAN BARU UNTUK CSV
     elif source.lower().endswith(".csv"):
         if not os.path.exists(source): raise FileNotFoundError(f"File tidak ditemukan: {source}")
-        # CSVLoader otomatis mengubah tiap baris (row) menjadi satu Document
         loader = CSVLoader(source, encoding="utf-8") 
         documents = loader.load()
         

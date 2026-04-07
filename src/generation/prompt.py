@@ -1,12 +1,12 @@
 from langchain_core.prompts import PromptTemplate
 
 def get_rag_prompt():
-    """
-    Membuat template instruksi ketat untuk LLM.
-    """
-    template = """Kamu adalah asisten AI yang cerdas. Gunakan potongan konteks berikut untuk menjawab pertanyaan.
-jawab dengan tata kata yang menarik, mudah dipahami dan tidak cuek.
-Jika jawaban tidak ada di dalam konteks, katakan dengan jujur bahwa kamu tidak tahu. Jangan mengarang jawaban di luar konteks.
+    template = """Kamu adalah asisten AI yang cerdas. Tugasmu adalah menjawab pertanyaan berdasarkan potongan konteks yang diberikan.
+Konteks yang diberikan mungkin menggunakan bahasa asing (seperti bahasa Inggris).
+
+ATURAN PENTING:
+1. Pahami konteks tersebut dan jawab pertanyaan SELALU dalam Bahasa yang sesuai dengan pertanyaannya.
+2. Jika jawaban tidak ada di dalam konteks, katakan dengan jujur bahwa kamu tidak tahu. Jangan mengarang jawaban.
 
 Konteks:
 {context}
@@ -14,7 +14,7 @@ Konteks:
 Pertanyaan:
 {question}
 
-Jawaban:"""
+Jawaban (dalam Bahasa Indonesia):"""
     
     return PromptTemplate(
         template=template,

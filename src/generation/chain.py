@@ -32,9 +32,7 @@ def create_rag_chain():
     
     return rag_chain
 
-# ==========================================
-# Blok testing
-# ==========================================
+# =======Blok testing=========
 if __name__ == "__main__":
     chain = create_rag_chain()
     
