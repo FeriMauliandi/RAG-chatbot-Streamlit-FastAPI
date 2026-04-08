@@ -2,12 +2,11 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from typing import List
 
-chunk_size = 2000
-chunk_overlap = 200
-
 #   documents: List dokumen dari loader.py
 #   chunk_size: Jumlah karakter maksimal per potongan.
 #   chunk_overlap: Jumlah karakter yang tumpang tindih antar potongan.
+chunk_size = 1000
+chunk_overlap = 200
 
 def split_documents(documents: List[Document], chunk_size, chunk_overlap):
     """
@@ -30,9 +29,7 @@ def split_documents(documents: List[Document], chunk_size, chunk_overlap):
     print(f"Berhasil memecah dokumen menjadi {len(chunks)} potongan teks.")
     return chunks
 
-# ==========================================
-# Blok testing
-# ==========================================
+# =========blok testing=========
 if __name__ == "__main__":
     # Contoh penggunaan sederhana
     from loader import load_data

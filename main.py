@@ -9,16 +9,12 @@ sys.path.append(root_dir)
 # Kita HANYA mengimpor fungsi untuk memuat RAG Chain
 from src.generation.chain import create_rag_chain
 
-# ==========================================
 # Konfigurasi UI Streamlit
-# ==========================================
 st.set_page_config(page_title="AI Engineer Copilot", page_icon="🤖", layout="wide")
 st.title("🤖 RAG Assistant (Production Mode)")
 st.markdown("Database telah dimuat. Silakan ajukan pertanyaan seputar dokumenmu.")
 
-# ==========================================
 # CACHING: Memuat RAG Chain (dan ChromaDB) satu kali saja
-# ==========================================
 @st.cache_resource
 def load_rag_chain():
     # Fungsi ini di dalam chain.py akan otomatis memanggil Chroma()

@@ -10,11 +10,8 @@ from src.ingestion.chunker import split_documents
 from src.ingestion.embedder import get_embedding_model
 from src.retrieval.vector_store import get_vector_store
 
-# ==========================================
-# DAFTAR SEMUA SUMBER DATA
-# ==========================================
 SOURCES = [
-    "data/hasil.pdf",           # PDF      # Markdown
+    "data/hasil.pdf",        
 ]
 
 def run_ingestion_pipeline():
