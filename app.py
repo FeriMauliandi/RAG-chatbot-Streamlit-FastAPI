@@ -2,6 +2,9 @@ import streamlit as st
 import os
 import sys
 
+import logging
+os.environ["TRANSFORMERS_VERBOSITY"] = "error"
+
 # Memastikan Python bisa membaca folder 'src'
 root_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(root_dir)
@@ -10,9 +13,9 @@ sys.path.append(root_dir)
 from src.generation.chain import create_rag_chain
 
 # Konfigurasi UI Streamlit
-st.set_page_config(page_title="AI Engineer Copilot", page_icon="🤖", layout="wide")
-st.title("🤖 RAG Assistant (Production Mode)")
-st.markdown("Database telah dimuat. Silakan ajukan pertanyaan seputar dokumenmu.")
+st.set_page_config(page_title="qwenLele", page_icon="🦈", layout="centered")
+st.title("🦈 qwenLele: Chatbot Budidaya Lele Berbasis RAG")
+st.markdown("Model: {model}".format(model="Qwen3:4B (LLM lokal)"))
 
 # CACHING: Memuat RAG Chain (dan ChromaDB) satu kali saja
 @st.cache_resource

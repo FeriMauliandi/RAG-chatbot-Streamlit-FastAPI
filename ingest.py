@@ -1,7 +1,5 @@
 import os
 import sys
-
-# Memastikan Python bisa membaca folder 'src'
 root_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(root_dir)
 
@@ -11,33 +9,32 @@ from src.ingestion.embedder import get_embedding_model
 from src.retrieval.vector_store import get_vector_store
 
 SOURCES = [
-    "data/hasil.pdf",        
+    "data/budidayalele.pdf",
+    "https://www.cimbniaga.co.id/id/inspirasi/bisnis/budidaya-ikan-lele",
+    "https://diskan.pamekasankab.go.id/berita/2020/03/02/mari-mengenal-teknik-budidaya-lele-tingkat-dasar/"
+
 ]
 
 def run_ingestion_pipeline():
     print("🚀 Memulai Data Ingestion Pipeline...\n")
     all_chunks = []
     
-    # 1. Ekstrak dan Potong semua dokumen
     for source in SOURCES:
         try:
-            # Load
             raw_docs = load_data(source)
-            # Chunk
             chunks = split_documents(raw_docs, chunk_size=800, chunk_overlap=150)
             all_chunks.extend(chunks)
-            print(f"✅ Berhasil memproses: {source} ({len(chunks)} chunks)")
+            print(f"Berhasil memproses: {source} ({len(chunks)} chunks)")
         except Exception as e:
-            print(f"❌ Gagal memproses {source}: {e}")
+            print(f"Gagal memproses {source}: {e}")
             
-    # 2. Masukkan ke Vector Database secara massal
     if all_chunks:
-        print(f"\nMenyiapkan model embedding dan menyimpan {len(all_chunks)} chunks ke ChromaDB...")
+        print(f"\nMenyiapkan model embedding dan menyimpan {len(all_chunks)} chunks ke ChromaDB.")
         embedder = get_embedding_model()
         get_vector_store(chunks=all_chunks, embedding_model=embedder)
-        print("\n🔥 Selesai! Semua data telah masuk ke database dan siap digunakan oleh Streamlit.")
+        print("\nSelesai! Semua data telah masuk ke database dan siap digunakan oleh Streamlit.")
     else:
-        print("\n⚠️ Tidak ada data yang berhasil diproses.")
+        print("\nTidak ada data yang berhasil diproses.")
 
 if __name__ == "__main__":
     run_ingestion_pipeline()
