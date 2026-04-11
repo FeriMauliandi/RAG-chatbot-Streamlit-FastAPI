@@ -15,7 +15,7 @@ from src.generation.chain import create_rag_chain
 # Konfigurasi UI Streamlit
 st.set_page_config(page_title="qwenLele", page_icon="🦈", layout="centered")
 st.title("🦈 qwenLele: Chatbot Budidaya Lele Berbasis RAG")
-st.markdown("Model: {model}".format(model="Qwen3:4B (LLM lokal)"))
+st.markdown("Model: {model}".format(model="Qwen3.5:cloud"))
 
 # CACHING: Memuat RAG Chain (dan ChromaDB) satu kali saja
 @st.cache_resource

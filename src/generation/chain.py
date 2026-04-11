@@ -1,8 +1,10 @@
 import sys
 import os
+from dotenv import load_dotenv
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_ollama import ChatOllama
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 sys.path.append(root_dir)
@@ -11,6 +13,11 @@ from src.retrieval.vector_store import get_vector_store
 from src.retrieval.retriever import get_retriever
 from src.generation.prompt import get_rag_prompt
 
+load_dotenv()
+
+# 2. Tangkap API Key dari environment
+my_api_key = os.getenv("GOOGLE_API_KEY")
+
 def create_rag_chain():
     embedder = get_embedding_model()
     vs = get_vector_store(embedding_model=embedder)
@@ -18,7 +25,7 @@ def create_rag_chain():
     
     prompt = get_rag_prompt()
     
-    llm = ChatOllama(model="qwen3.5:cloud", temperature=0.2, think=False) 
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2, api_key=os.getenv("GOOGLE_API_KEY")) 
 
     # llm = ChatOpenAI(
     #     model="nvidia/nemotron-3-super-120b-a12b:free", # Contoh model di OpenRouter, sesuaikan dengan pilihanmu
