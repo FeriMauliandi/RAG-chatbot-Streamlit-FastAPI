@@ -1,50 +1,63 @@
 import os
-import sys  
+import sys
+from dotenv import load_dotenv
 
-def get_retriever(vector_store, search_type="similarity", k=4):
-    """
-    Mengubah Vector Store menjadi objek Retriever untuk mencari dokumen relevan.
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+sys.path.append(root_dir)
+
+import torch
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.cross_encoders import HuggingFaceCrossEncoder
+from langchain_classic.retrievers.document_compressors import CrossEncoderReranker
+from langchain_community.vectorstores import Chroma
+from langchain_community.retrievers import BM25Retriever
+from langchain_classic.retrievers import EnsembleRetriever, ContextualCompressionRetriever, MultiQueryRetriever
+from langchain_core.documents import Document
+from src.ingestion.embedder import get_embedding_model
+
+def get_advanced_retriever(llm, search_type="similarity", final_k=3, fetch_k=5):
+    print("Menyiapkan Advanced Retriever (MultiQuery + Hybrid + Reranker) untuk General Chat...")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    embeddings = get_embedding_model()
+    vector_store = Chroma(persist_directory="chroma_db", embedding_function=embeddings)
     
-    Args:
-        vector_store: Objek ChromaDB yang sudah dimuat.
-        search_type: Tipe pencarian ('similarity' atau 'mmr').
-        k: Jumlah potongan dokumen (chunks) teratas yang ingin diambil.
-    """
-    print(f"Menyiapkan Retriever (Tipe: {search_type}, Mengambil {k} dokumen)")
+    db_data = vector_store.get()
+    num_docs = len(db_data.get('documents', [])) if db_data else 0
     
-    retriever = vector_store.as_retriever(
+    if num_docs == 0:
+        safe_fetch_k = 1
+        safe_final_k = 1
+    else:
+        # fetch_k lebih besar agar reranker punya banyak pilihan dokumen untuk disortir
+        safe_fetch_k = min(fetch_k, num_docs) 
+        safe_final_k = min(final_k, num_docs)
+
+    vector_retriever = vector_store.as_retriever(
         search_type=search_type,
-        search_kwargs={"k": k}
+        search_kwargs={"k": safe_fetch_k},
     )
     
-    return retriever
-
-# ==========================================
-# Blok testing
-# ==========================================
-if __name__ == "__main__":
-    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
-    sys.path.append(root_dir)
-
-    from src.ingestion.embedder import get_embedding_model
-    from src.retrieval.vector_store import get_vector_store
+    if num_docs == 0:
+        base_retriever = vector_retriever
+    else:
+        docs = [Document(page_content=txt, metadata=meta or {}) for txt, meta in zip(db_data['documents'], db_data.get('metadatas', []))]
+        bm25_retriever = BM25Retriever.from_documents(docs)
+        bm25_retriever.k = safe_fetch_k
+        
+        # Bobot seimbang untuk literatur umum
+        base_retriever = EnsembleRetriever(retrievers=[bm25_retriever, vector_retriever], weights=[0.5, 0.5])
     
-    embedder = get_embedding_model()
-    vs = get_vector_store(embedding_model=embedder)
+    if llm is None:
+        print("LLM tidak diberikan. MultiQueryRetriever dilewati.")
+        multi_query_retriever = base_retriever
+    else:
+        multi_query_retriever = MultiQueryRetriever.from_llm(retriever=base_retriever, llm=llm)
     
-    retriever = get_retriever(vs, k=1)
+    cross_encoder = HuggingFaceCrossEncoder(model_name="BAAI/bge-reranker-v2-m3", model_kwargs={"device": device})
+    compressor = CrossEncoderReranker(model=cross_encoder, top_n=safe_final_k)
     
-    pertanyaan = "Apa itu ChromaDB?"
-    print(f"\nPertanyaan: '{pertanyaan}'")
-    
-    hasil_dengan_skor = vs.similarity_search_with_score(pertanyaan, k=3)
-    
-    print("\nHasil Pencarian dan Skor Jarak (Makin kecil angkanya, makin relevan):")
-    for doc, skor in hasil_dengan_skor:
-        print(f"Skor: {skor:.4f} | Teks: {doc.page_content}")
-    
-    hasil_pencarian = retriever.invoke(pertanyaan)
-    
-    print("\nHasil Pencarian Paling Relevan:")
-    for i, doc in enumerate(hasil_pencarian):
-        print(f"{i+1}. {doc.page_content}")
+    final_retriever = ContextualCompressionRetriever(
+        base_compressor=compressor,
+        base_retriever=multi_query_retriever
+    )
+    return final_retriever

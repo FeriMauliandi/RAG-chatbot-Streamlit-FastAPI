@@ -3,14 +3,12 @@ import os
 from dotenv import load_dotenv
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-from langchain_ollama import ChatOllama
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import SystemMessage
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 sys.path.append(root_dir)
 from src.ingestion.embedder import get_embedding_model
 from src.retrieval.vector_store import get_vector_store
-from src.retrieval.retriever import get_retriever
+from src.retrieval.retriever import get_advanced_retriever
 from src.generation.prompt import get_rag_prompt
 
 load_dotenv()
@@ -19,21 +17,11 @@ load_dotenv()
 my_api_key = os.getenv("GOOGLE_API_KEY")
 
 def create_rag_chain():
-    embedder = get_embedding_model()
-    vs = get_vector_store(embedding_model=embedder)
-    retriever = get_retriever(vs, k=5) 
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2, api_key=os.getenv("GOOGLE_API_KEY")) 
+    retriever = get_advanced_retriever(llm=llm, search_type="similarity", final_k=3, fetch_k=5)
     
     prompt = get_rag_prompt()
-    
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2, api_key=os.getenv("GOOGLE_API_KEY")) 
 
-    # llm = ChatOpenAI(
-    #     model="nvidia/nemotron-3-super-120b-a12b:free", # Contoh model di OpenRouter, sesuaikan dengan pilihanmu
-    #     temperature=0.2,
-    #     openai_api_key=os.getenv("OPENROUTER_API_KEY"), 
-    #     openai_api_base="https://openrouter.ai/api/v1",
-    # ) 
-    
     # 3. Rangkai menjadi Chain
     def format_docs(docs):
         # ==========================================
